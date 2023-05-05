@@ -3,6 +3,8 @@ name: Docker-Ownflow-spark
 on:
   push:
     tags: [ 'ownflow-spark-v*.*.*' ]
+    paths:
+      - 'builders/ownflow-spark/**'
 
 env:
   IMAGE_NAME: "rcdfs/ownflow-spark"
@@ -18,16 +20,9 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            ownflow_spark_builder:
-              - 'builders/ownflow-spark/**'
 
       - name: Log in to Docker Hub
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        if: steps.filter.outputs.ownflow_spark_builder == 'true'
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -35,13 +30,11 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        if: steps.filter.outputs.ownflow_spark_builder == 'true'
         with:
           images: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-        if: steps.filter.outputs.ownflow_spark_builder == 'true'
         with:
           context: .
           push: true
